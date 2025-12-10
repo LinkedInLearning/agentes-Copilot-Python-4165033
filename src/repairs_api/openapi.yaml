@@ -1,0 +1,170 @@
+openapi: 3.1.0
+info:
+  title: Repair Service
+  description: >
+    A simple service to manage repair tickets for devices so that
+    Microsoft 365 Copilot agents can list, inspect, and create repairs
+    on behalf of users.
+  version: 1.0.0
+
+servers:
+  - url: https://fa3abfbb0f86.ngrok-free.app
+    description: Production Repair Service API
+
+paths:
+  /repairs:
+    get:
+      operationId: listRepairs
+      summary: List all repairs
+      description: >
+        Returns a list of repair tickets with their details. You can optionally
+        filter by status or by who the repair is assigned to.
+      parameters:
+        - name: status
+          in: query
+          description: >
+            Optional status to filter repairs by. For example, 'New',
+            'In Progress', or 'Completed'.
+          required: false
+          schema:
+            type: string
+          example: "New"
+        - name: assignedTo
+          in: query
+          description: >
+            Optional name or ID of the person or team the repair is assigned to.
+          required: false
+          schema:
+            type: string
+          example: "John Doe"
+      responses:
+        "200":
+          description: A list of repairs matching the filters.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Repair"
+              examples:
+                example1:
+                  summary: Example list of repairs
+                  value:
+                    - id: "1"
+                      item: "Laptop"
+                      description: "Screen is flickering and sometimes goes black."
+                      status: "In Progress"
+                      assigned_to: "John Doe"
+                      created_at: "2024-10-21T09:15:00Z"
+                    - id: "2"
+                      item: "Printer"
+                      description: "Paper jam error on every print job."
+                      status: "New"
+                      assigned_to: null
+                      created_at: "2024-10-22T11:30:00Z"
+        "500":
+          description: Server error
+    post:
+      operationId: createRepair
+      summary: Create a new repair
+      description: Create a new repair ticket for a device that needs to be fixed.
+      requestBody:
+        required: true
+        description: Information about the device and the issue to be repaired.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RepairCreate"
+            examples:
+              example1:
+                summary: Example create payload
+                value:
+                  item: "Laptop"
+                  description: "Laptop won't turn on after a power outage."
+                  status: "New"
+                  assigned_to: "Tier 1 Support"
+      responses:
+        "201":
+          description: Repair ticket successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Repair"
+              examples:
+                example1:
+                  summary: Example created repair
+                  value:
+                    id: "3"
+                    item: "Laptop"
+                    description: "Laptop won't turn on after a power outage."
+                    status: "New"
+                    assigned_to: "Tier 1 Support"
+                    created_at: "2024-10-23T08:00:00Z"
+        "400":
+          description: Invalid request body.
+        "500":
+          description: Server error
+
+components:
+  schemas:
+    Repair:
+      type: object
+      description: A repair ticket representing a device that needs to be fixed.
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the repair ticket.
+          example: "1"
+        item:
+          type: string
+          description: Name or type of the item that needs repair.
+          example: "Laptop"
+        description:
+          type: string
+          description: Short description of the issue reported by the customer.
+          example: "Screen is flickering and sometimes goes black."
+        status:
+          type: string
+          description: Current status of the repair.
+          example: "In Progress"
+        assigned_to:
+          type: string
+          nullable: true
+          description: Name of the person or team assigned to this repair.
+          example: "John Doe"
+        created_at:
+          type: string
+          format: date-time
+          description: Date and time when the repair ticket was created (UTC).
+          example: "2024-10-21T09:15:00Z"
+      required:
+        - id
+        - item
+        - description
+        - status
+        - created_at
+
+    RepairCreate:
+      type: object
+      description: Payload for creating a new repair ticket.
+      properties:
+        item:
+          type: string
+          description: Name or type of the item that needs repair.
+          example: "Laptop"
+        description:
+          type: string
+          description: Short description of the issue reported by the customer.
+          example: "Laptop won't turn on after a power outage."
+        status:
+          type: string
+          description: Initial status of the repair.
+          example: "New"
+        assigned_to:
+          type: string
+          nullable: true
+          description: Name of the person or team to assign this repair to.
+          example: "Tier 1 Support"
+      required:
+        - item
+        - description
