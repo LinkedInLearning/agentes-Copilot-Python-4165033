@@ -1,37 +1,28 @@
 openapi: 3.0.4
 info:
-  title: Repair Service - Subset
-  description: >
-    A simple service to manage repair tickets for devices so that Microsoft 365 Copilot
-    agents can list, inspect, and create repairs on behalf of users.
+  title: Repair Service - Subset - Subset - Subset
+  description: "A simple service to manage repair tickets for devices so that Microsoft 365 Copilot agents can list, inspect, and create repairs on behalf of users.\n"
   version: 1.0.0
-
 servers:
-  - url: http://repairs-api.whitefield-7955832c.westus2.azurecontainerapps.io
+  - url: https://repairs-api.whitefield-7955832c.westus2.azurecontainerapps.io
     description: Development Repair Service API
-
 paths:
   /repairs:
     get:
       summary: List all repairs
-      description: >
-        Returns a list of repair tickets with their details. You can optionally
-        filter by status or by who the repair is assigned to.
+      description: "Returns a list of repair tickets with their details. You can optionally filter by status or by who the repair is assigned to.\n"
       operationId: listRepairs
       parameters:
         - name: status
           in: query
-          description: >
-            Optional status to filter repairs by. For example, 'New', 'In Progress',
-            or 'Completed'.
+          description: "Optional status to filter repairs by. For example, 'New', 'In Progress', or 'Completed'.\n"
           explode: false
           schema:
             type: string
           example: New
         - name: assignedTo
           in: query
-          description: >
-            Optional name or ID of the person or team the repair is assigned to.
+          description: "Optional name or ID of the person or team the repair is assigned to.\n"
           explode: false
           schema:
             type: string
@@ -55,7 +46,7 @@ paths:
                     id:
                       type: string
                       description: Unique identifier of the repair ticket.
-                      example: "1"
+                      example: '1'
                     item:
                       type: string
                       description: Name or type of the item that needs repair.
@@ -75,43 +66,40 @@ paths:
                       example: John Doe
                     created_at:
                       type: string
-                      format: date-time
                       description: Date and time when the repair ticket was created (UTC).
-                      example: "2024-10-21T09:15:00Z"
+                      format: date-time
+                      example: '2024-10-21T09:15:00Z'
                     created_by:
                       type: string
+                      description: "Identifier of who created this ticket. In this demo it contains the Microsoft 365 tenant ID and optionally the Copilot conversation ID (for example: \"tenant-guid|conversation-id\").\n"
                       nullable: true
-                      description: >
-                        Identifier of who created this ticket. In this demo it contains
-                        the Microsoft 365 tenant ID and optionally the Copilot conversation ID
-                        (for example: "tenant-guid|conversation-id").
-                      example: "0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98"
+                      example: 0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98
               examples:
                 example1:
                   summary: Example list of repairs
                   value:
-                    - id: "1"
+                    - id: '1'
                       item: Laptop
                       description: Screen is flickering and sometimes goes black.
                       status: In Progress
                       assigned_to: John Doe
-                      created_at: "2024-10-21T09:15:00Z"
-                      created_by: "0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98"
-                    - id: "2"
+                      created_at: '2024-10-21T09:15:00Z'
+                      created_by: 0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98
+                    - id: '2'
                       item: Printer
                       description: Paper jam error on every print job.
                       status: New
-                      assigned_to: null
-                      created_at: "2024-10-22T11:30:00Z"
-                      created_by: "0fcedede-479e-4430-9b2d-8bbebc7a53a7|another-conversation-id"
-
+                      assigned_to: 'null'
+                      created_at: '2024-10-22T11:30:00Z'
+                      created_by: 0fcedede-479e-4430-9b2d-8bbebc7a53a7|another-conversation-id
+      security:
+        - apiKey: [ ]
     post:
       summary: Create a new repair
       description: Create a new repair ticket for a device that needs to be fixed.
       operationId: createRepair
       requestBody:
         description: Information about the device and the issue to be repaired.
-        required: true
         content:
           application/json:
             schema:
@@ -146,6 +134,7 @@ paths:
                   description: Laptop won't turn on after a power outage.
                   status: New
                   assigned_to: Tier 1 Support
+        required: true
       responses:
         '201':
           description: Repair ticket successfully created.
@@ -163,7 +152,7 @@ paths:
                   id:
                     type: string
                     description: Unique identifier of the repair ticket.
-                    example: "3"
+                    example: '3'
                   item:
                     type: string
                     description: Name or type of the item that needs repair.
@@ -183,26 +172,29 @@ paths:
                     example: Tier 1 Support
                   created_at:
                     type: string
-                    format: date-time
                     description: Date and time when the repair ticket was created (UTC).
-                    example: "2024-10-23T08:00:00Z"
+                    format: date-time
+                    example: '2024-10-23T08:00:00Z'
                   created_by:
                     type: string
+                    description: "Identifier of who created this ticket (tenant and/or conversation coming from Microsoft 365 Copilot headers).\n"
                     nullable: true
-                    description: >
-                      Identifier of who created this ticket (tenant and/or conversation
-                      coming from Microsoft 365 Copilot headers).
-                    example: "0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98"
+                    example: 0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98
               examples:
                 example1:
                   summary: Example created repair
                   value:
-                    id: "3"
+                    id: '3'
                     item: Laptop
                     description: Laptop won't turn on after a power outage.
                     status: New
                     assigned_to: Tier 1 Support
-                    created_at: "2024-10-23T08:00:00Z"
-                    created_by: "0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98"
-
-components: {}
+                    created_at: '2024-10-23T08:00:00Z'
+                    created_by: 0fcedede-479e-4430-9b2d-8bbebc7a53a7|0888dbea-089a-4916-880b-37ef84360d98
+      security:
+        - apiKey: [ ]
+components:
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer

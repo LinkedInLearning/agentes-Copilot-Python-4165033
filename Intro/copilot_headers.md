@@ -8,6 +8,8 @@
 
 * X-Microsoft-AI-UserTimeZone
 
+### Models
+
 ```python
 class RepairBase(BaseModel):
     item: str
@@ -23,6 +25,7 @@ class RepairCreate(RepairBase):
     """Payload for creating a new repair ticket."""
 ```
 
+### Endpoints
 
 ```python
 
@@ -43,4 +46,29 @@ def create_repair(payload: RepairCreate) -> Repair:
     )
     repairs_db.append(repair)
     return repair
+```
+
+### Database 
+
+```python
+def create_repair_in_db(
+    item: str,
+    description: str,
+    status: str = "New",
+    assigned_to: Optional[str] = None,
+) -> Dict[str, Any]:
+    repair_id = str(uuid4())
+    created_at = datetime.utcnow().isoformat()
+
+    doc = {
+        "id": repair_id,
+        "item": item,
+        "description": description,
+        "status": status,
+        "assigned_to": assigned_to,
+        "created_at": created_at,
+    }
+
+    container.create_item(doc)
+    return doc
 ```

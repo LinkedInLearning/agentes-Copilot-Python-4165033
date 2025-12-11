@@ -1,7 +1,7 @@
 {
     "$schema": "https://developer.microsoft.com/json-schemas/copilot/plugin/v2.3/schema.json",
     "schema_version": "v2.3",
-    "name_for_human": "Repair Service - Subset",
+    "name_for_human": "Repair Service - Subset - Subset",
     "description_for_human": "A simple service to manage repair tickets for devices so that Microsoft 365 Copilot agents can list, inspect, and create repairs on behalf of users.\n",
     "description_for_model": "A simple service to manage repair tickets for devices so that Microsoft 365 Copilot agents can list, inspect, and create repairs on behalf of users.\n",
     "contact_email": "publisher-email@example.com",
@@ -14,14 +14,23 @@
         },
         {
             "name": "listRepairs",
-            "description": "Returns a list of repair tickets with their details. You can optionally filter by status or by who the repair is assigned to.\n"    
+            "description": "Returns a list of repair tickets with their details. You can optionally filter by status or by who the repair is assigned to.\n",
+            "capabilities": {
+                "response_semantics": {
+                    "data_path": "$",
+                    "static_template": {
+                        "file": "./adaptiveCards/listRepairs.json"
+                    }
+                }
+            }
         }
     ],
     "runtimes": [
         {
             "type": "OpenApi",
             "auth": {
-                "type": "None"
+                "type": "ApiKeyPluginVault",
+                "reference_id": "3812c32a-7dd4-4ca8-877c-d27d3e4aaa83"
             },
             "spec": {
                 "url": "apiSpecificationFile/openapi.yaml"

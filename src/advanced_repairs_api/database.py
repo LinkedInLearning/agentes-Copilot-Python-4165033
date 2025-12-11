@@ -1,30 +1,33 @@
-"""database.py using Cosmos DB"""
+"""database.py - Acceso a datos para la Repair API usando Azure Cosmos DB."""
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
-from uuid import uuid4
 
 from dotenv import load_dotenv
-from azure.cosmos import CosmosClient, PartitionKey
+from azure.cosmos import CosmosClient, exceptions
 
+# Cargar variables de entorno en local (.env)
 load_dotenv()
 
-COSMOS_ENDPOINT = os.getenv("COSMOS_ENDPOINT")
+COSMOS_URL = os.getenv("COSMOS_ENDPOINT")
 COSMOS_KEY = os.getenv("COSMOS_KEY")
-COSMOS_DATABASE = os.getenv("COSMOS_DATABASE", "db-servicedesk")
-COSMOS_CONTAINER = os.getenv("COSMOS_CONTAINER", "repairs")
+COSMOS_DB_NAME = os.getenv("COSMOS_DATABASE")
+COSMOS_CONTAINER_NAME = os.getenv("COSMOS_CONTAINER", "Repairs")
 
-if not COSMOS_ENDPOINT or not COSMOS_KEY:
-    raise RuntimeError("Missing COSMOS_ENDPOINT or COSMOS_KEY env vars")
+if not all([COSMOS_URL, COSMOS_KEY, COSMOS_DB_NAME]):
+    raise RuntimeError(
+        "Missing one or more Cosmos env variables. "
+        "Make sure COSMOS_URL, COSMOS_KEY and COSMOS_DB_NAME are set."
+    )
 
-client = CosmosClient(COSMOS_ENDPOINT, COSMOS_KEY)
+# Crear cliente de Cosmos y obtener referencias a DB y contenedor
+try:
+    client = CosmosClient(COSMOS_URL, credential=COSMOS_KEY)
+    database = client.get_database_client(COSMOS_DB_NAME)
+    container = database.get_container_client(COSMOS_CONTAINER_NAME)
+except exceptions.CosmosHttpResponseError as e:
+    raise RuntimeError(f"Error connecting to Cosmos DB: {e}") from e
 
-# Ensure DB & container exist (safe if already created)
-database = client.create_database_if_not_exists(id=COSMOS_DATABASE)
-container = database.create_container_if_not_exists(
-    id=COSMOS_CONTAINER,
-    partition_key=PartitionKey(path="/id"),
-)
 
 def create_repair_in_db(
     item: str,
@@ -33,55 +36,92 @@ def create_repair_in_db(
     assigned_to: Optional[str] = None,
     created_by: Optional[str] = None,
 ) -> Dict[str, Any]:
-    repair_id = str(uuid4())
-    created_at = datetime.utcnow().isoformat() + "Z"
+    """
+    Inserta un ticket de reparación en Cosmos DB y devuelve el documento como dict.
 
-    doc = {
+    Campos:
+    - id: GUID generado por la API
+    - item, description, status, assigned_to: datos funcionales
+    - created_at: timestamp UTC ISO-8601
+    - created_by: identificador de quién crea el ticket (tenant|conversation, etc.)
+    """
+    from uuid import uuid4
+
+    repair_id = str(uuid4())
+    created_at = datetime.now(timezone.utc).isoformat()
+
+    doc: Dict[str, Any] = {
         "id": repair_id,
         "item": item,
         "description": description,
         "status": status,
         "assigned_to": assigned_to,
         "created_at": created_at,
-        "created_by": created_by
+        "created_by": created_by,
     }
 
-    container.create_item(body=doc)
+    container.create_item(doc)
     return doc
+
 
 def list_repairs_from_db(
     status: Optional[str] = None,
     assigned_to: Optional[str] = None,
+    created_by: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
-    query = "SELECT * FROM c"
-    params = []
+    """
+    Devuelve una lista de tickets desde Cosmos DB, con filtros opcionales:
 
-    if status and assigned_to:
-        query += " WHERE c.status = @status AND CONTAINS(c.assigned_to, @assigned_to)"
-        params = [
-            {"name": "@status", "value": status},
-            {"name": "@assigned_to", "value": assigned_to},
-        ]
-    elif status:
-        query += " WHERE c.status = @status"
-        params = [{"name": "@status", "value": status}]
-    elif assigned_to:
-        query += " WHERE CONTAINS(c.assigned_to, @assigned_to)"
-        params = [{"name": "@assigned_to", "value": assigned_to}]
+    - status: filtra por estado exacto (New, In Progress, Completed, etc.)
+    - assigned_to: hace un CONTAINS sobre el campo assigned_to (case-insensitive).
+    - created_by: filtra por el identificador guardado (tenant o tenant|conversation).
+    """
+    query = """
+        SELECT c.id, c.item, c.description, c.status,
+               c.assigned_to, c.created_at, c.created_by
+        FROM c
+        WHERE 1 = 1
+    """
+    parameters: List[Dict[str, Any]] = []
 
-    items = container.query_items(
-        query=query,
-        parameters=params,
-        enable_cross_partition_query=True,
+    if status:
+        query += " AND c.status = @status"
+        parameters.append({"name": "@status", "value": status})
+
+    if assigned_to:
+        # CONTAINS, case-insensitive (tercer parámetro = true)
+        query += " AND IS_DEFINED(c.assigned_to) " \
+                 "AND CONTAINS(c.assigned_to, @assigned_to, true)"
+        parameters.append({"name": "@assigned_to", "value": assigned_to})
+
+    if created_by:
+        query += " AND c.created_by = @created_by"
+        parameters.append({"name": "@created_by", "value": created_by})
+
+    items = list(
+        container.query_items(
+            query=query,
+            parameters=parameters,
+            enable_cross_partition_query=True,
+        )
     )
-    return list(items)
+
+    # items ya es una lista de dicts
+    return items
+
 
 if __name__ == "__main__":
-    print("Testing Cosmos connection & insert...")
-    r = create_repair_in_db(
-        item="Laptop",
-        description="Screen is flickering",
-        assigned_to="Jane Doe",
+    # Pequeño test manual para validar conexión
+    print("Testing DB connection and insert...")
+    sample = create_repair_in_db(
+        item="Test device",
+        description="Just a test ticket from database.py __main__",
+        status="New",
+        assigned_to="Demo User",
+        created_by="local-test",
     )
-    print("Inserted:", r)
-    print("All repairs:", list_repairs_from_db())
+    print("Inserted document:")
+    print(sample)
+
+    repairs = list_repairs_from_db()
+    print(f"Total repairs in DB: {len(repairs)}")

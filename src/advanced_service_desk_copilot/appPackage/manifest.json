@@ -14,12 +14,12 @@
     "outline": "outline.png"
   },
   "name": {
-    "short": "advanced-service-desk-cop${{APP_NAME_SUFFIX}}",
-    "full": "Full name for advanced-service-desk-copilot"
+    "short": "advanced_service_desk_cop${{APP_NAME_SUFFIX}}",
+    "full": "Full name for advanced_service_desk_copilot"
   },
   "description": {
-    "short": "Short description for advanced-service-desk-copilot",
-    "full": "Full description for advanced-service-desk-copilot"
+    "short": "Short description for advanced_service_desk_copilot",
+    "full": "Full description for advanced_service_desk_copilot"
   },
   "accentColor": "#FFFFFF",
   "copilotAgents": {

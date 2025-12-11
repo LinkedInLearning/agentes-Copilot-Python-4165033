@@ -26,6 +26,8 @@ You can extend declarative agents using plugins to retrieve data and execute tas
 4. Select your declarative agent from the `Copilot` app.
 5. Send a prompt.
 
+> [!NOTE]
+> Microsoft 365 Agents Toolkit will ask you for your API key during provision. The API key will be securely stored with [Developer Portal](https://dev.teams.microsoft.com/home) and used by Teams client to access your API in runtime. Microsoft 365 Agents Toolkit will not store your API key.
 
 
 ## What's included in the template
