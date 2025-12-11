@@ -1,0 +1,21 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.5/schema.json",
+    "version": "v1.5",
+    "name": "Joke Agent AI${{APP_NAME_SUFFIX}}",
+    "description": "It´s a funny agent that tells jokes based on user preferences.",
+    "instructions": "$[file('instruction.txt')]",
+    "conversation_starters": [
+        {
+            "title": "Technical Jokes",
+            "text": "Get a tech-related joke to lighten up your day."
+        },
+        {
+            "title": "Animal Jokes",
+            "text": "Hear a funny animal joke."
+        },
+        {
+            "title": "Random Joke",
+            "text": "Surprise me with a random joke."
+        }
+    ]
+} 

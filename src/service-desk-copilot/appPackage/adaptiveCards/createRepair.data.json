@@ -1,0 +1,8 @@
+{
+  "id": "3",
+  "item": "Laptop",
+  "description": "Laptop is overheating after 10 minutes of use.",
+  "status": "New",
+  "assigned_to": "Tier 1 Support",
+  "created_at": "2024-10-23T08:00:00Z"
+}

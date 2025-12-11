@@ -1,0 +1,21 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/copilot/declarative-agent/v1.5/schema.json",
+    "version": "v1.5",
+    "name": "service-desk-copilot",
+    "description": "Declarative agent created with Microsoft 365 Agents Toolkit can assist user in calling APIs and retrieving responses",
+    "instructions": "$[file('instruction.txt')]",
+    "actions": [
+        {
+            "id": "action_1",
+            "file": "ai-plugin.json"
+        }
+    ],
+    "conversation_starters": [
+        {
+            "text": "List all repair tickets"
+        },
+        {
+            "text": "Create a new repair"
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+{
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "body": [{
+      "type": "TextBlock",
+      "text": "Repair ticket created ✅",
+      "size": "Large",
+      "weight": "Bolder",
+      "horizontalAlignment": "Center"
+    },
+    {
+      "type": "Container",
+      "spacing": "Medium",
+      "items": [
+        {
+          "type": "TextBlock",
+          "text": "Ticket ID: ${id}",
+          "weight": "Bolder"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${item}",
+          "weight": "Bolder",
+          "spacing": "Small"
+        },
+        {
+          "type": "TextBlock",
+          "text": "${description}",
+          "wrap": true
+        },
+        {
+          "type": "FactSet",
+          "facts": [
+            {
+              "title": "Status:",
+              "value": "${status}"
+            },
+            {
+              "title": "Assigned to:",
+              "value": "${if(assigned_to, assigned_to, 'Unassigned')}"
+            },
+            {
+              "title": "Created at:",
+              "value": "${created_at}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
