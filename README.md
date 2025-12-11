@@ -1,7 +1,7 @@
 
-# [Desarrolla agentes para Microsoft 365 Copilot con Python desde cero
+# Desarrolla agentes para Microsoft 365 Copilot con Python desde cero
 
-Este es el repositorio del curso de LinkedIn Learning `[Desarrolla agentes para Microsoft 365 Copilot con Python desde cero]`. El curso completo está disponible en [LinkedIn Learning][lil-course-url].
+Este es el repositorio del curso de LinkedIn Learning `Desarrolla agentes para Microsoft 365 Copilot con Python desde cero`. El curso completo está disponible en [LinkedIn Learning][lil-course-url].
 
 ![Desarrolla agentes para Microsoft 365 Copilot con Python desde cero][lil-thumbnail-url] 
 
